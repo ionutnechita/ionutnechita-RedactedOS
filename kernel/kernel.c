@@ -13,9 +13,10 @@
 #include "networking/processes/net_proc.h"
 #include "memory/page_allocator.h"
 #include "networking/network.h"
-#include "math/random.h"
+#include "dev/random/random.h"
 #include "filesystem/filesystem.h"
 #include "dev/module_loader.h" 
+#include "audio/audio.h"
 
 void kernel_main() {
 
@@ -28,36 +29,26 @@ void kernel_main() {
 
     init_main_process();
 
-    load_module(console_module);
-
-    mmu_alloc();
-
-    // mmu_enable_verbose();
-    print_hardware();
+    load_module(&console_module);
     kprint("UART output enabled");
 
-    uint64_t seed;
-    asm volatile("mrs %0, cntvct_el0" : "=r"(seed));
-    rng_init_global(seed);
-    kprintf("Random init. seed: %i\n", seed);
+    // mmu_enable_verbose();
+    mmu_alloc();
+
+    print_hardware();
+
+    load_module(&rng_module);
 
     kprint("Exception vectors set");
    
     kprint("Initializing kernel...");
-
-    kprint("Preparing for draw");
-    gpu_size screen_size = {1080,720};
     
     irq_init();
     kprintf("Interrupts initialized");
 
     enable_interrupt();
 
-    kprint("Initializing GPU");
-
-    gpu_init(screen_size);
-    
-    kprintf("GPU initialized");
+    load_module(&graphics_module);
     
     kprintf("Initializing disk...");
 
@@ -73,6 +64,9 @@ void kernel_main() {
         panic("Input initialization error");
 
     bool network_available = network_init();
+    
+    load_module(&audio_module);
+
     init_input_process();
 
     mmu_init();
