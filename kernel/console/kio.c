@@ -76,7 +76,8 @@ void kprintf(const char *fmt, ...){
     puts(buf);
     putc('\r');
     putc('\n');
-    kfree((void*)buf, 256);
+    //TODO: these buffers should be freed sometime, maybe after writing them to disk, and even those should be wiped eventually
+    // kfree((void*)buf, 256);
 }
 
 void kprint(const char *fmt){
@@ -90,10 +91,10 @@ void kputf(const char *fmt, ...){
     va_list args;
     va_start(args, fmt);
     char* buf = kalloc(print_buf, 256, ALIGN_64B, true, false);
-    string_format_va_buf(fmt, buf, args);
+    size_t len = string_format_va_buf(fmt, buf, args);
     va_end(args);
     puts(buf);
-    kfree((void*)buf, 256);
+    // kfree((void*)buf, 256);
 }
 
 void disable_visual(){

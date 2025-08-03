@@ -17,6 +17,7 @@
 
 #define BPP 4
 
+//TODO: format logs
 VirtioGPUDriver* VirtioGPUDriver::try_init(gpu_size preferred_screen_size){
     VirtioGPUDriver* driver = new VirtioGPUDriver();
     if (driver->init(preferred_screen_size))
@@ -27,7 +28,7 @@ VirtioGPUDriver* VirtioGPUDriver::try_init(gpu_size preferred_screen_size){
 
 bool VirtioGPUDriver::init(gpu_size preferred_screen_size){
     
-    uint64_t addr = find_pci_device(0x1AF4, 0x1050);
+    uint64_t addr = find_pci_device(VIRTIO_VENDOR, VIRTIO_GPU_ID);
     if (!addr){ 
         kprintf("Virtio GPU not found");
         return false;
@@ -342,7 +343,7 @@ typedef struct virtio_flush_cmd {
 void VirtioGPUDriver::flush() {
 
     if (full_redraw) {
-        transfer_to_host((gpu_rect){0,0,screen_size.width,screen_size.height});
+        transfer_to_host((gpu_rect){{0,0},{screen_size.width,screen_size.height}});
     } else {
         for (uint32_t i = 0; i < dirty_count; i++) {
             gpu_rect r = dirty_rects[i];

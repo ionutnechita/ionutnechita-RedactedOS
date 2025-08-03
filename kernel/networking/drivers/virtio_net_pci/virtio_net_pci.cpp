@@ -8,6 +8,7 @@
 
 #define RECEIVE_QUEUE 0
 #define TRANSMIT_QUEUE 1
+//TODO: review this number
 #define MAX_size 0x1000
 
 #define kprintfv(fmt, ...) \
@@ -46,10 +47,8 @@ VirtioNetDriver* VirtioNetDriver::try_init(){
     return nullptr;
 }
 
-
-
 bool VirtioNetDriver::init(){
-    uint64_t addr = find_pci_device(0x1AF4, 0x1000);
+    uint64_t addr = find_pci_device(VIRTIO_VENDOR, VIRTIO_NET_ID);
     if (!addr){ 
         kprintf("[VIRTIO_NET error] Virtio network device not found");
         return false;
